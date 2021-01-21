@@ -10,8 +10,6 @@ function init() {
     });
 }
 
-d3.selectAll("#subjectInput").on("change", handleSubmit);
-
 // Submit Button handler
 function handleSubmit() {
     // Prevent the page from refreshing
@@ -89,3 +87,4 @@ function buildDemoInfo(theData, subject) {
 }
 
 init();
+d3.selectAll("#subjectInput").on("change", handleSubmit);
