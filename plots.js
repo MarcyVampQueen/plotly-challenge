@@ -5,6 +5,7 @@ function unpack(rows, index) {
     });
 }
 
+
 // Add event listener for submit button
 d3.selectAll("#subjectInput").on("change", handleSubmit);
 
@@ -15,7 +16,6 @@ function handleSubmit() {
 
     // Select the input value from the form
     var subject = d3.select("#subjectInput").node().value;
-    console.log(subject);
 
     // Update the Dashboard!
     buildPlot(subject);
@@ -31,45 +31,30 @@ function handleSubmit() {
 // }
 
 function buildPlot(subject) {
-    d3.json("samples.json").then(function (data) {
-        console.log(data);
+    d3.json("samples.json").then(function (theData) {
+        // Sort the data by values and then filter by subject
+        theData.samples.sort((first, second) => first.sample_values - second.sample_values);
+        filtered = theData.samples.filter(id => id.id === subject)[0];
+        console.log(filtered);
+        
         // Grab values from the response json object to build the plots
-        var name = data.dataset.name;
-        var stock = data.dataset.dataset_code;
-        var startDate = data.dataset.start_date;
-        var endDate = data.dataset.end_date;
-        // Print the names of the columns
-        console.log(data.dataset.column_names);
-        // Print the data for each day
-        console.log(data.dataset.data);
-        var dates = unpack(data.dataset.data, 0);
-        // console.log(dates);
-        var closingPrices = unpack(data.dataset.data, 4);
-        // console.log(closingPrices);
+        var values = filtered.sample_values.slice(0,10);
+        var ids = filtered.otu_ids.map(id => "OTU " + id).slice(0,10);
+        var labels = filtered.otu_labels.slice(0,10);
 
         var trace1 = {
-            type: "scatter",
-            mode: "lines",
-            name: name,
-            x: dates,
-            y: closingPrices,
-            line: {
-                color: "#17BECF"
-            }
+            type: "bar",
+            x: values,
+            y: ids,
+            orientation: 'h',
+            text: labels
         };
 
         var data = [trace1];
 
         var layout = {
-            title: `${stock} closing prices`,
-            xaxis: {
-                range: [startDate, endDate],
-                type: "date"
-            },
-            yaxis: {
-                autorange: true,
-                type: "linear"
-            }
+            title: `Subject ${subject} OTUs`,
+            xaxis: {title:"Values"}
         };
 
         Plotly.newPlot("plot", data, layout);
